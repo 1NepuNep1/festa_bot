@@ -6,7 +6,7 @@ from telegram import Update, InlineQueryResultArticle, InputTextMessageContent, 
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
 
-from src.db.database import db
+from src.db.database import db, User
 from src.db.utils import create_interaction, create_user, user_exists
 from src.utils.utils import generateGaussianDistribution, transformRandomValueResult, getRandomLink, getRandomEmoji
 
@@ -29,7 +29,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     chat_id=chat_id
   )
 
-async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE, specific_user_id: int) -> None:
   # query = update.inline_query.query // receive what input person typed in
   db.connect(reuse_if_open=True)
 
@@ -52,23 +52,37 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     language_code: {current_user.language_code}; \
     gala_resiult: {result}"
   )
+  user = User.get(User.id == current_user.id)
   
-  result_id = str(uuid4())
+  if current_user.id == specific_user_id and not user.received_discount:
+    result_id = str(uuid4())
 
-  # list_of_bots = """1. <b>Личностный тест</b> - @five_factor_model_bot\n2. <b>Бросаться снежками</b> - @throw_snowball_bot\n3. <b>Last.FM bot</b> - @lastfm_tgbot\n\nПо интересующим вопросам, @keeeparis"""
-    
-  results = [
-    # InlineQueryResultPhoto(
-    #         id=str(uuid4()),
-    #         photo_url="https://i.ibb.co/0qKyhfG/festa-x-dsba.jpg",
-    #         thumb_url="https://i.ibb.co/0qKyhfG/festa-x-dsba.jpg",
-    #         title="Кто ты сегодня с Met Gala?",
-    #         caption=f"<b>{result}</b>",
-    #         parse_mode=ParseMode.HTML,
-    #         reply_markup=InlineKeyboardMarkup([[
-    #             InlineKeyboardButton("Открыть Met Gala", url="https://t.me/metgalaposvyat")
-    #         ]])
-        # ),
+    results = [
+      InlineQueryResultArticle(
+            id=result_id,
+            title="Кто ты сегодня с Met Gala?",
+            input_message_content=InputTextMessageContent(
+                f"<b>Поздравляю! Ты выиграл скидку на билет на Met Gala Posvyat. Напиши кому нибудь из организаторов!</b>"
+                f"<a href='https://i.ibb.co/0Cpg6xv/aap-rocky-attends-the-2023-met-gala-celebrating-karl-lagerfeld-a-line-of-beauty-1714429223233.jpg'> 🎉</a>",
+                parse_mode=ParseMode.HTML
+            ),
+            url='https://t.me/metgalaposvyat', 
+            description="Узнай, какая ты celebrity с Met Gala сегодня!",
+            thumb_url="https://i.ibb.co/0qKyhfG/festa-x-dsba.jpg",
+            thumb_width=246,
+            thumb_height=303,
+            reply_markup=InlineKeyboardMarkup([[
+                InlineKeyboardButton("Met Gala Posvyat", url="https://t.me/metgalaposvyat")
+            ]])
+          )
+    ]
+    context.user_data['inline_results'] = {result_id: "Поздравляю! Ты выиграл скидку на билет на Met Gala Posvyat. Напиши кому нибудь из организаторов!"}
+    user.received_discount = True
+    user.save()
+  else:
+    result_id = str(uuid4())
+
+    results = [
     InlineQueryResultArticle(
             id=result_id,
             title="Кто ты сегодня с Met Gala?",
@@ -86,17 +100,10 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                 InlineKeyboardButton("Met Gala Posvyat", url="https://t.me/metgalaposvyat")
             ]])
         ),
-    # InlineQueryResultArticle(
-    #   id=str(uuid4()),
-    #   title="Список ботов",
-    #   input_message_content=InputTextMessageContent(
-    #     f"{list_of_bots}", parse_mode=ParseMode.HTML
-    #   ),
-    #   url='https://seesaw.kz',
-    #   description="⬇️ Клик ⬇️",
-    # ),
-  ]
-  context.user_data['inline_results'] = {result_id: result}
+    ]
+    context.user_data['inline_results'] = {result_id: result}
+    user.save()
+
   try:
     await update.inline_query.answer(results, cache_time=20, is_personal=True)
     # logging.info("Inline query answered successfully")
@@ -117,16 +124,6 @@ async def chosen_inline_result(update: Update, context: ContextTypes.DEFAULT_TYP
     # logging.info(f"Editing message with inline_message_id: {inline_message_id}")
 
     asyncio.create_task(edit_message_later(inline_message_id, context, result))
-    # try:
-    #     await asyncio.sleep(60)
-    #     await context.bot.edit_message_text(
-    #         inline_message_id=inline_message_id,
-    #         text=f"<b>{result}</b>",
-    #         parse_mode="HTML"
-    #     )
-    #     # logging.info(f"Message with inline_message_id {inline_message_id} edited successfully")
-    # except Exception as e:
-    #     logging.error(f"Failed to edit message: {e}")
 
 async def edit_message_later(inline_message_id: str, context: ContextTypes.DEFAULT_TYPE, result: str) -> None:
     try:

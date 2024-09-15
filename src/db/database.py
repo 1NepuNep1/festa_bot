@@ -20,6 +20,7 @@ class User(BaseModel):
   first_name = CharField()
   last_name = CharField(null=True)
   created_at = DateTimeField()
+  received_discount = BooleanField(null=False)
   
   class Meta:
     table_name = 'User'
