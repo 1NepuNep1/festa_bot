@@ -45,10 +45,10 @@ if [ ! -f "${SERVICE_DIR}/.env" ]; then
 # Telegram Bot Configuration
 TOKEN=your_telegram_bot_token_here
 
-# MySQL Database Configuration (for external MySQL)
+# MySQL Database Configuration (for Docker MySQL)
 DB_HOST=localhost
 DB_USER=root
-DB_PWD=your_db_password
+DB_PWD=password
 DB=festa_bot_db
 EOF
     echo -e "${YELLOW}⚠️  Please edit ${SERVICE_DIR}/.env with your actual values${NC}"

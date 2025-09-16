@@ -12,12 +12,26 @@ WorkingDirectory=/opt/festa-bot
 Environment=HOME=/root
 Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-# Pre-start: Pull latest image
+# Pre-start: Pull latest image and setup MySQL
 ExecStartPre=-/usr/bin/docker pull yourusername/festa-bot:latest
-ExecStartPre=-/usr/bin/docker stop festa-bot
-ExecStartPre=-/usr/bin/docker rm festa-bot
+ExecStartPre=-/usr/bin/docker pull mysql:8.0
+ExecStartPre=-/usr/bin/docker stop festa-bot festa-mysql
+ExecStartPre=-/usr/bin/docker rm festa-bot festa-mysql
 
-# Start: Run the container
+# Start: Run MySQL container first
+ExecStartPre=/usr/bin/docker run \
+  --name festa-mysql \
+  --restart=unless-stopped \
+  -e MYSQL_ROOT_PASSWORD=password \
+  -e MYSQL_DATABASE=festa_bot_db \
+  -p 3306:3306 \
+  -d \
+  mysql:8.0
+
+# Wait for MySQL to be ready
+ExecStartPre=/bin/sleep 10
+
+# Start: Run the bot container
 ExecStart=/usr/bin/docker run \
   --name festa-bot \
   --restart=unless-stopped \
@@ -25,9 +39,10 @@ ExecStart=/usr/bin/docker run \
   --network host \
   yourusername/festa-bot:latest
 
-# Stop: Stop and remove container
+# Stop: Stop and remove containers
 ExecStop=/usr/bin/docker stop festa-bot
-ExecStopPost=-/usr/bin/docker rm festa-bot
+ExecStopPost=-/usr/bin/docker stop festa-mysql
+ExecStopPost=-/usr/bin/docker rm festa-bot festa-mysql
 
 # Restart policy
 Restart=always
