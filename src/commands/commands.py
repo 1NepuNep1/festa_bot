@@ -65,7 +65,7 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE, speci
                 parse_mode=ParseMode.HTML
             ),
             url='https://t.me/edafesta', 
-            description="Узнай, что с тобой случится в 2010-х!",
+            description="Узнай, кто ты сегодня из 2010-х!",
             thumb_url="https://i.ibb.co/mCRJWYZT/telegram-cloud-document-2-5321245724174745216.jpg",
             thumb_width=246,
             thumb_height=303,
@@ -88,7 +88,7 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE, speci
                 parse_mode=ParseMode.HTML
             ),
             url='https://t.me/edafesta', 
-            description="Узнай, что случится с тобой в 2010-х!",
+            description="Узнай, кто ты сегодня из 2010-х!",
             thumb_url="https://i.ibb.co/mCRJWYZT/telegram-cloud-document-2-5321245724174745216.jpg",
             thumb_width=246,
             thumb_height=303,
