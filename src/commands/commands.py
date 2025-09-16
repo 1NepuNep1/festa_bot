@@ -1,14 +1,13 @@
 import logging
-import asyncio
 from html import escape
 from uuid import uuid4
-from telegram import Update, InlineQueryResultArticle, InputTextMessageContent, InlineQueryResultPhoto, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import Update, InlineQueryResultArticle, InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
 
 from src.db.database import db, User
 from src.db.utils import create_interaction, create_user, user_exists
-from src.utils.utils import generateGaussianDistribution, transformRandomValueResult, getRandomLink, getRandomEmoji
+from src.utils.utils import generateGaussianDistribution, transformRandomValueResult, getRandomEmoji
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
   """Send a message when the command /start is issued."""
@@ -60,23 +59,21 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE, speci
     results = [
       InlineQueryResultArticle(
             id=result_id,
-            title="Кто ты сегодня с Met Gala?",
+            title="Что с тобой случится в 2010-х?",
             input_message_content=InputTextMessageContent(
-                f"<b>Поздравляю! Ты выиграл скидку на билет на Met Gala Posvyat. Напиши кому нибудь из организаторов!</b>"
-                f"<a href='https://i.ibb.co/0Cpg6xv/aap-rocky-attends-the-2023-met-gala-celebrating-karl-lagerfeld-a-line-of-beauty-1714429223233.jpg'> 🎉</a>",
+                f"<b>Поздравляю! Ты выиграл скидку на билет на Festa& Echo. Напиши кому нибудь из организаторов! 🎉</b>",
                 parse_mode=ParseMode.HTML
             ),
-            url='https://t.me/metgalaposvyat', 
-            description="Узнай, какая ты celebrity с Met Gala сегодня!",
-            thumb_url="https://i.ibb.co/0qKyhfG/festa-x-dsba.jpg",
+            url='https://t.me/edafesta', 
+            description="Узнай, что с тобой случится в 2010-х!",
+            thumb_url="https://i.ibb.co/mCRJWYZT/telegram-cloud-document-2-5321245724174745216.jpg",
             thumb_width=246,
             thumb_height=303,
             reply_markup=InlineKeyboardMarkup([[
-                InlineKeyboardButton("Met Gala Posvyat", url="https://t.me/metgalaposvyat")
+                InlineKeyboardButton("Festa& Echo", url="https://t.me/edafesta")
             ]])
           )
     ]
-    context.user_data['inline_results'] = {result_id: "Поздравляю! Ты выиграл скидку на билет на Met Gala Posvyat. Напиши кому нибудь из организаторов!"}
     user.received_discount = True
     user.save()
   else:
@@ -85,23 +82,21 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE, speci
     results = [
     InlineQueryResultArticle(
             id=result_id,
-            title="Кто ты сегодня с Met Gala?",
+            title="Что с тобой случится в 2010-х?",
             input_message_content=InputTextMessageContent(
-                f"<b>{result}</b>"
-                f"<a href='{getRandomLink(value)}'> {getRandomEmoji(int(generateGaussianDistribution(0, 42)))}</a>",
+                f"<b>{result}</b> {getRandomEmoji(int(generateGaussianDistribution(0, 42)))}",
                 parse_mode=ParseMode.HTML
             ),
-            url='https://t.me/metgalaposvyat', 
-            description="Узнай, какая ты celebrity с Met Gala сегодня!",
-            thumb_url="https://i.ibb.co/0qKyhfG/festa-x-dsba.jpg",
+            url='https://t.me/edafesta', 
+            description="Узнай, что случится с тобой в 2010-х!",
+            thumb_url="https://i.ibb.co/mCRJWYZT/telegram-cloud-document-2-5321245724174745216.jpg",
             thumb_width=246,
             thumb_height=303,
             reply_markup=InlineKeyboardMarkup([[
-                InlineKeyboardButton("Met Gala Posvyat", url="https://t.me/metgalaposvyat")
+                InlineKeyboardButton("Festa& Echo", url="https://t.me/edafesta")
             ]])
         ),
     ]
-    context.user_data['inline_results'] = {result_id: result}
     user.save()
 
   try:
@@ -111,28 +106,3 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE, speci
     logging.error(f"Failed to answer inline query: {e}")
   db.close()
 
-
-async def chosen_inline_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    # logging.info("chosen_inline_result function called")
-    
-    chosen_result = update.chosen_inline_result
-    result_id = chosen_result.result_id  # Получаем result_id
-    # logging.info(f"Chosen result: {chosen_result}")
-
-    inline_message_id = chosen_result.inline_message_id
-    result = context.user_data.get('inline_results', {}).get(result_id, "Фото больше недоступно.")
-    # logging.info(f"Editing message with inline_message_id: {inline_message_id}")
-
-    asyncio.create_task(edit_message_later(inline_message_id, context, result))
-
-async def edit_message_later(inline_message_id: str, context: ContextTypes.DEFAULT_TYPE, result: str) -> None:
-    try:
-        await asyncio.sleep(60)
-        await context.bot.edit_message_text(
-            inline_message_id=inline_message_id,
-            text=f"<b>{result}</b>",
-            parse_mode="HTML"
-        )
-        # logging.info(f"Message with inline_message_id {inline_message_id} edited successfully")
-    except Exception as e:
-        logging.error(f"Failed to edit message: {e}")

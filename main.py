@@ -7,13 +7,13 @@ print(f"DB_USER: {config('DB_USER')}")
 print(f"DB: {config('DB')}")
 
 
-specific_user_id = 0
+specific_user_id = -1
 
 
-from telegram.ext import Application, CommandHandler, InlineQueryHandler, ChosenInlineResultHandler
+from telegram.ext import Application, CommandHandler, InlineQueryHandler
 from telegram import __version__ as TG_VER
 
-from src.commands.commands import help_command, inline_query, start, chosen_inline_result
+from src.commands.commands import help_command, inline_query, start
 from src.db.database import *
 
 try:
@@ -51,7 +51,6 @@ def main() -> None:
   application.add_handler(CommandHandler("start", start))
   application.add_handler(CommandHandler("help", help_command))
   application.add_handler(InlineQueryHandler(inline_query_handler))
-  application.add_handler(ChosenInlineResultHandler(chosen_inline_result))
   application.add_error_handler(error_handler)
   
   application.run_polling()

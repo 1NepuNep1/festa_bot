@@ -1,0 +1,51 @@
+[Unit]
+Description=Festa Bot Telegram Service
+Documentation=https://github.com/yourusername/festa_bot
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/festa-bot
+Environment=HOME=/root
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Pre-start: Pull latest image
+ExecStartPre=-/usr/bin/docker pull yourusername/festa-bot:latest
+ExecStartPre=-/usr/bin/docker stop festa-bot
+ExecStartPre=-/usr/bin/docker rm festa-bot
+
+# Start: Run the container
+ExecStart=/usr/bin/docker run \
+  --name festa-bot \
+  --restart=unless-stopped \
+  --env-file /opt/festa-bot/.env \
+  --network host \
+  yourusername/festa-bot:latest
+
+# Stop: Stop and remove container
+ExecStop=/usr/bin/docker stop festa-bot
+ExecStopPost=-/usr/bin/docker rm festa-bot
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=60s
+StartLimitBurst=3
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=festa-bot
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/festa-bot
+
+[Install]
+WantedBy=multi-user.target
