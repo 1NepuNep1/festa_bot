@@ -61,7 +61,7 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE, speci
             id=result_id,
             title="Что с тобой случится в 2010-х?",
             input_message_content=InputTextMessageContent(
-                f"<b>Поздравляю! Ты выиграл скидку на билет на Festa& Echo. Напиши кому нибудь из организаторов! 🎉</b>",
+                f"<b>Поздравляю! Ты выиграл проходку на Festa& Echo. Скорее пиши @dvank и забирай ее! 🎉</b>",
                 parse_mode=ParseMode.HTML
             ),
             url='https://t.me/edafesta', 
