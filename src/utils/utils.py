@@ -129,8 +129,18 @@ def transformRandomValueResult(num: int) -> str:
   #   return f"My dick is {str(num)} cm {getRandom(step_20)}"
   
   # return f"My dick is {str(num)} cm {getRandom(step_25)}"
-  return names_array[num]
+  # Безопасный доступ к массиву с проверкой границ
+  if 0 <= num < len(names_array):
+    return names_array[num]
+  else:
+    # Если индекс выходит за границы, возвращаем случайный элемент
+    return getRandom(names_array)
 
 def getRandomEmoji(num: int) -> str:
-  return emojis[num]
+  # Безопасный доступ к массиву эмодзи с проверкой границ
+  if 0 <= num < len(emojis):
+    return emojis[num]
+  else:
+    # Если индекс выходит за границы, возвращаем случайный эмодзи
+    return getRandom(emojis)
 
