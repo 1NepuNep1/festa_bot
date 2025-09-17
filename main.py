@@ -7,7 +7,7 @@ print(f"DB_USER: {config('DB_USER')}")
 print(f"DB: {config('DB')}")
 
 
-specific_user_id = -1
+specific_user_id = 944191039
 
 
 from telegram.ext import Application, CommandHandler, InlineQueryHandler
